@@ -10,18 +10,30 @@ eventBus.addQueryHandler('get:data', _ => {
 
 eventBus.addCommandHandler('insert:data', _ => {
   return new Promise(resolve => {
-    console.log('data was inserted');
-    // setTimeout(resolve, 1000);
+    console.log('data was inserted by the first handler');
+    setTimeout(resolve, 1000);
+  });
+});
+
+eventBus.addCommandHandler('insert:data', _ => {
+  return new Promise(resolve => {
+    console.log('data was inserted by the second handler');
+    setTimeout(resolve, 1000);
   });
 });
 
 
 async function main() {
-  console.log(
-    await eventBus.runQuery('get:data')
-  );
+  try {
+    console.log(
+      await eventBus.runQuery('get:data')
+    );
 
-  await eventBus.emitBatch('insert:data');
+    // await eventBus.emitBatch('insert:data')
+    await eventBus.emitSequence('insert:data')
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 main();

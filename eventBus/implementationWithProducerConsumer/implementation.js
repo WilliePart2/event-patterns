@@ -9,16 +9,16 @@ class EventBus {
   }
 
   constructor() {
-    this._listeners = new Map();
+    this._listeners = {};
     this._qeuryHandlers = new Map();
   }
 
   addCommandHandler(eventName, listener) {
-    if (!this._listeners.get(eventName)) {
-      this._listeners.set(eventName, new Set());
+    if (!this._listeners[eventName]) {
+      this._listeners[eventName] = [];
     }
 
-    this._listeners.get(eventName).add(listener);
+    this._listeners[eventName].push(listener);
   }
 
   addQueryHandler(queryName, handler) {
@@ -26,20 +26,15 @@ class EventBus {
   }
 
   async emitBatch(eventName, ...data) {
-    const listeners = Array.from(this._listeners.get(eventName));
-    // if (!listeners.length) {
-    //   return;
-    await listeners[0]();
+    const listeners = this._listeners[eventName];
 
-    // }
-    console.log(listeners[0]);
     await Promise.all(
       listeners.map(listener => listener(...data))
     );
   }
 
   async emitSequence(eventName, ...data) {
-    const listeners = Array.from(this._listeners.get(eventName));
+    const listeners = this._listeners[eventName];
 
     async function runListener(index, middlewares) {
       if (!middlewares[index]) {
